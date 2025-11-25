@@ -76,6 +76,14 @@ NLP_Project/
 - **Task Type**: Regression (continuous score prediction)
 - **Average Text Length**: ~1,099 words (combined)
 
+## Dataset Sources
+
+The datasets used in this project are available on Hugging Face:
+
+1. **ATS Scoring Dataset**: https://huggingface.co/datasets/0xnbk/resume-ats-score-v1-en/tree/main
+2. **CV-Job Match Dataset**: https://huggingface.co/datasets/cnamuangtoun/resume-job-description-fit/tree/main
+3. **NER Dataset**: https://huggingface.co/datasets/Mehyaar/Annotated_NER_PDF_Resumes
+
 ## Model Architectures
 
 ### NER Models
