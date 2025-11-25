@@ -10,12 +10,11 @@ models/*.pb
 
 # Large data files
 data/
+!data/model_training/
 pre-processed-data/
-*.csv
 *.parquet
 *.feather
 *.hdf5
-*.h5
 
 # Python
 __pycache__/
