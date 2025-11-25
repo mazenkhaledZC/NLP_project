@@ -46,40 +46,14 @@ NLP_Project/
 └── trained_models/                # Saved trained models (will be created during training)
     ├── ner/
     │   ├── bert/
-    │   │   ├── model.pth
-    │   │   ├── config.json
-    │   │   ├── tokenizer_config.json
-    │   │   └── training_history.json
     │   ├── roberta/
-    │   │   └── ...
-    │   ├── distilbert/
-    │   │   └── ...
     │   └── bilstm_crf/
-    │       └── ...
     ├── cv_job_match/
     │   ├── bert/
-    │   │   ├── model.pth
-    │   │   ├── config.json
-    │   │   ├── tokenizer_config.json
-    │   │   └── training_history.json
-    │   ├── roberta/
-    │   │   └── ...
     │   ├── sbert/
-    │   │   └── ...
-    │   └── lstm_siamese/
-    │       └── ...
     └── ats/
         ├── bert/
-        │   ├── model.pth
-        │   ├── config.json
-        │   ├── tokenizer_config.json
-        │   └── training_history.json
         ├── roberta/
-        │   └── ...
-        ├── sbert/
-        │   └── ...
-        └── lstm_attention/
-            └── ...
 ```
 
 ## Dataset Statistics
