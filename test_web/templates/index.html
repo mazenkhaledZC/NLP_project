@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Analysis - NLP Project</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid #f8f9fa;
+            font-weight: 600;
+        }
+        .skill-badge {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.35rem 0.75rem;
+            margin: 0.25rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+        }
+        .progress-bar {
+            border-radius: 15px;
+            font-weight: 600;
+        }
+        .match-result {
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .match-result.good-fit {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .match-result.potential-fit {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .match-result.no-fit {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .probability-bar {
+            margin-bottom: 0.5rem;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+        .loading .btn-text {
+            display: none;
+        }
+        #results {
+            display: none;
+        }
+        .extracted-text {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        .file-info {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #e8f4ea;
+            border-radius: 5px;
+        }
+        .ats-score-display {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <h1><i class="bi bi-file-earmark-person"></i> CV Analysis System</h1>
+            <p class="lead mb-0">Analyze your CV using advanced NLP models</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Input Section -->
+            <div class="col-lg-6">
+                <form id="analysisForm">
+                    <!-- CV Upload Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-upload"></i> Upload CV (PDF)
+                        </div>
+                        <div class="card-body">
+                            <div class="file-upload-area" id="dropZone">
+                                <i class="bi bi-file-earmark-pdf" style="font-size: 2rem; color: #667eea;"></i>
+                                <p class="mt-2 mb-0">Drag and drop your CV here or click to browse</p>
+                                <small class="text-muted">Supported format: PDF (max 16MB)</small>
+                                <input type="file" id="cvFile" name="cv_file" accept=".pdf" class="d-none">
+                            </div>
+                            <div class="file-info" id="fileInfo">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <span id="fileName"></span>
+                                <button type="button" class="btn btn-sm btn-outline-danger float-end" id="removeFile">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Or paste CV text -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-file-text"></i> Or Paste CV Text
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control" id="cvText" name="cv_text" rows="6"
+                                placeholder="Paste your CV/Resume text here if you don't have a PDF..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Job Description Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-briefcase"></i> Job Description
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control" id="jobDescription" name="job_description" rows="6"
+                                placeholder="Paste the job description here..." required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <span class="btn-text"><i class="bi bi-search"></i> Analyze CV</span>
+                            <span class="loading-spinner">
+                                <span class="spinner-border spinner-border-sm" role="status"></span>
+                                Analyzing...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="col-lg-6">
+                <div id="results">
+                    <!-- Skills Extraction Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-lightbulb"></i> Extracted Skills (NER Model)
+                        </div>
+                        <div class="card-body">
+                            <div id="skillsContainer">
+                                <!-- Skills will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CV-Job Match Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-arrow-left-right"></i> CV-Job Match Result
+                        </div>
+                        <div class="card-body">
+                            <div id="matchResult" class="match-result mb-3">
+                                <!-- Match result will be inserted here -->
+                            </div>
+                            <h6>Match Probabilities:</h6>
+                            <div id="matchProbabilities">
+                                <!-- Probabilities will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ATS Score Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-speedometer2"></i> ATS Compatibility Score
+                        </div>
+                        <div class="card-body text-center">
+                            <div id="atsScore" class="ats-score-display">
+                                <!-- Score will be inserted here -->
+                            </div>
+                            <div class="progress mt-3">
+                                <div id="atsProgressBar" class="progress-bar" role="progressbar">
+                                </div>
+                            </div>
+                            <p id="atsInterpretation" class="mt-3 mb-0">
+                                <!-- Interpretation will be inserted here -->
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Extracted Text Preview -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-file-text"></i> Extracted CV Text (Preview)
+                        </div>
+                        <div class="card-body">
+                            <div id="extractedText" class="extracted-text">
+                                <!-- Extracted text will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="container mt-5 mb-4 text-center text-muted">
+        <p>NLP Project - CV Analysis System</p>
+        <small>Using BERT-based models for NER, CV-Job Matching, and ATS Scoring</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('analysisForm');
+            const cvFile = document.getElementById('cvFile');
+            const cvText = document.getElementById('cvText');
+            const dropZone = document.getElementById('dropZone');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const results = document.getElementById('results');
+            const errorAlert = document.getElementById('errorAlert');
+
+            // File upload handling
+            dropZone.addEventListener('click', () => cvFile.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length && files[0].type === 'application/pdf') {
+                    cvFile.files = files;
+                    showFileInfo(files[0]);
+                }
+            });
+
+            cvFile.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    showFileInfo(e.target.files[0]);
+                }
+            });
+
+            function showFileInfo(file) {
+                fileName.textContent = file.name;
+                fileInfo.style.display = 'block';
+                cvText.disabled = true;
+                cvText.placeholder = 'PDF file selected - text input disabled';
+            }
+
+            removeFile.addEventListener('click', () => {
+                cvFile.value = '';
+                fileInfo.style.display = 'none';
+                cvText.disabled = false;
+                cvText.placeholder = 'Paste your CV/Resume text here if you don\'t have a PDF...';
+            });
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validate
+                const jobDescription = document.getElementById('jobDescription').value.trim();
+                if (!jobDescription) {
+                    showError('Please enter a job description');
+                    return;
+                }
+
+                if (!cvFile.files.length && !cvText.value.trim()) {
+                    showError('Please upload a CV or paste CV text');
+                    return;
+                }
+
+                // Show loading state
+                analyzeBtn.classList.add('loading');
+                analyzeBtn.disabled = true;
+                hideError();
+                results.style.display = 'none';
+
+                try {
+                    const formData = new FormData(form);
+
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Analysis failed');
+                    }
+
+                    displayResults(data);
+                } catch (error) {
+                    showError(error.message);
+                } finally {
+                    analyzeBtn.classList.remove('loading');
+                    analyzeBtn.disabled = false;
+                }
+            });
+
+            function displayResults(data) {
+                results.style.display = 'block';
+
+                // Display skills
+                const skillsContainer = document.getElementById('skillsContainer');
+                if (data.skills && data.skills.length > 0) {
+                    skillsContainer.innerHTML = data.skills.map(skill =>
+                        `<span class="skill-badge">${escapeHtml(skill)}</span>`
+                    ).join('');
+                } else {
+                    skillsContainer.innerHTML = '<p class="text-muted">No skills detected</p>';
+                }
+
+                // Display match result
+                const matchResult = document.getElementById('matchResult');
+                const matchClass = data.match.prediction.toLowerCase().replace(' ', '-');
+                matchResult.className = `match-result ${matchClass}`;
+                matchResult.innerHTML = `
+                    <h4>${data.match.prediction}</h4>
+                    <p class="mb-0">Confidence: ${(data.match.confidence * 100).toFixed(1)}%</p>
+                `;
+
+                // Display match probabilities
+                const probContainer = document.getElementById('matchProbabilities');
+                probContainer.innerHTML = `
+                    <div class="probability-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>No Fit</span>
+                            <span>${(data.match.probabilities.no_fit * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-danger" style="width: ${data.match.probabilities.no_fit * 100}%"></div>
+                        </div>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Potential Fit</span>
+                            <span>${(data.match.probabilities.potential_fit * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-warning" style="width: ${data.match.probabilities.potential_fit * 100}%"></div>
+                        </div>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Good Fit</span>
+                            <span>${(data.match.probabilities.good_fit * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: ${data.match.probabilities.good_fit * 100}%"></div>
+                        </div>
+                    </div>
+                `;
+
+                // Display ATS score
+                const atsScore = document.getElementById('atsScore');
+                const atsBar = document.getElementById('atsProgressBar');
+                const atsInterpretation = document.getElementById('atsInterpretation');
+
+                atsScore.textContent = data.ats.score + '%';
+                atsScore.className = `ats-score-display text-${data.ats.color}`;
+
+                atsBar.style.width = data.ats.score + '%';
+                atsBar.className = `progress-bar bg-${data.ats.color}`;
+                atsBar.textContent = data.ats.score + '%';
+
+                atsInterpretation.textContent = data.ats.interpretation;
+                atsInterpretation.className = `mt-3 mb-0 text-${data.ats.color}`;
+
+                // Display extracted text
+                const extractedText = document.getElementById('extractedText');
+                extractedText.textContent = data.cv_text || 'No text extracted';
+
+                // Scroll to results
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function showError(message) {
+                errorAlert.classList.remove('d-none');
+                document.getElementById('errorMessage').textContent = message;
+            }
+
+            function hideError() {
+                errorAlert.classList.add('d-none');
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        });
+    </script>
+</body>
+</html>

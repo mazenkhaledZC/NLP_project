@@ -1,0 +1,47 @@
+# Large model files
+trained_models/
+models/*.h5
+models/*.pkl
+models/*.pt
+models/*.pth
+models/*.bin
+models/*.onnx
+models/*.pb
+
+# Large data files
+data/
+pre-processed-data/
+*.csv
+*.parquet
+*.feather
+*.hdf5
+*.h5
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
